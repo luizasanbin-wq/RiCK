@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>𝗥𝗜𝗖𝗞</title>
+    <title>RICK VIP - Lightning Style</title>
+    <!-- مكتبة الأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&display=swap" rel="stylesheet">
 
     <style>
+        /* === إعدادات عامة === */
         * {
             margin: 0;
             padding: 0;
@@ -29,32 +32,21 @@
             perspective: 1000px;
         }
 
-        /* --- شاشة اللمس الأولى (شفافة تقريباً) --- */
-        #click-to-start {
+        /* === 1. خلفية الفيديو (يظهر دائماً) === */
+        #bg-video {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 10000;
-            background: rgba(0,0,0,0.3); /* تعتيم بسيط جداً */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        
-        .click-msg {
-            font-size: 1.1rem;
-            animation: pulse 1s infinite;
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.4);
-            padding: 10px 30px;
-            border-radius: 50px;
-            backdrop-filter: blur(5px);
+            object-fit: cover;
+            z-index: -5; /* في الخلف تماماً */
+            filter: brightness(0.6); /* تعتيم بسيط لإبراز النصوص */
+            opacity: 0;
+            transition: opacity 1.5s ease;
         }
 
-        /* --- شاشة التحميل (Preloader) --- */
+        /* === 2. شاشة التحميل (Loader) === */
         #preloader {
             position: fixed;
             top: 0;
@@ -62,10 +54,10 @@
             width: 100%;
             height: 100%;
             z-index: 9999;
-            background: #000;
+            background: #000; /* خلفية سوداء للتحميل فقط */
             display: none;
             flex-direction: column;
-            justify-content: center; /* الفيديو والشريط في الوسط */
+            justify-content: center;
             align-items: center;
             transition: opacity 1s ease-out;
         }
@@ -78,103 +70,44 @@
             z-index: -1;
         }
 
-        /* === [تعديل هام] شريط التحميل الزجاجي الشفاف 100% === */
+        /* شريط التحميل الزجاجي */
         .glass-loader-bar {
             position: relative;
-            width: 320px; /* عرض مناسب */
+            width: 320px;
             height: 60px;
-            
-            /* الشفافية الحقيقية: لا لون خلفية */
-            background: rgba(255, 255, 255, 0.01); 
-            
-            /* تأثير الزجاج القوي (التمويه) */
-            backdrop-filter: blur(20px); 
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            
-            /* حدود رفيعة جداً وشفافة */
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50px;
-            
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 25px;
-            
-            /* ظل خفيف جداً لرفع الزجاج عن الفيديو */
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            
             z-index: 2;
             overflow: hidden;
             animation: floatBar 3s ease-in-out infinite;
         }
 
-        /* اللمعة الزرقاء الجانبية (Glow) */
         .glass-loader-bar::before {
             content: '';
             position: absolute;
-            left: -15px; /* مكان اللمعة في اليسار */
+            left: -15px;
             top: 0;
             width: 60px;
             height: 100%;
-            /* تدرج لوني أزرق شفاف جداً */
             background: radial-gradient(circle, rgba(0, 210, 255, 0.6) 0%, transparent 70%);
-            filter: blur(15px); /* نعومة اللمعة */
+            filter: blur(15px);
             opacity: 0.8;
         }
 
-        .loader-text-content {
-            font-size: 1rem;
-            color: #fff;
-            font-weight: 600;
-            z-index: 2;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5); /* ظل للنص ليظهر بوضوح فوق الزجاج */
-        }
+        .loader-text-content { font-size: 1rem; color: #fff; font-weight: 600; z-index: 2; }
+        .loader-icon { color: #fff; font-size: 1.2rem; animation: spin 2s linear infinite; z-index: 2; }
 
-        .loader-icon {
-            color: #fff;
-            font-size: 1.2rem;
-            animation: spin 2s linear infinite;
-            z-index: 2;
-            text-shadow: 0 0 10px rgba(0, 210, 255, 0.8); /* توهج للأيقونة */
-        }
+        @keyframes floatBar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-        @keyframes floatBar {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        /* --- باقي التنسيقات (الانتقالات والأزرار) --- */
-        #bg-video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -2;
-            filter: brightness(0.6);
-            opacity: 0;
-            transition: opacity 1.5s ease;
-        }
-
-        #music-control {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        .playing { box-shadow: 0 0 15px #4cd137; border-color: #4cd137 !important; }
-
-        /* الانتقالات السينمائية */
+        /* === 3. شاشة الدخول (Intro) === */
         #intro-screen {
             position: absolute;
             width: 100%;
@@ -184,7 +117,8 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
-            background: transparent;
+            /* خلفية شفافة ليرى الفيديو خلفها */
+            background: transparent; 
             transform: scale(1);
             opacity: 1;
             transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -200,16 +134,18 @@
             padding: 15px 70px;
             font-size: 1.2rem;
             color: #fff;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.6);
+            background: rgba(0,0,0,0.2); /* خلفية خفيفة جداً */
+            border: 1px solid rgba(255,255,255,0.4);
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 0 20px rgba(255,255,255,0.1);
             transition: 0.3s;
             backdrop-filter: blur(5px);
+            text-shadow: 0 0 5px white;
         }
-        .start-btn:hover { background: rgba(255,255,255,0.15); border-color: #fff; letter-spacing: 2px; }
+        .start-btn:hover { background: rgba(255,255,255,0.2); border-color: #00d2ff; box-shadow: 0 0 30px #00d2ff; }
 
+        /* === 4. المحتوى الرئيسي (Main) === */
         #main-content {
             display: none;
             width: 100%;
@@ -225,12 +161,11 @@
             transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        .zoom-in-enter {
-            opacity: 1 !important;
-            transform: scale(1) !important;
-        }
+        .zoom-in-enter { opacity: 1 !important; transform: scale(1) !important; }
 
+        /* --- قسم البروفايل والنص الدوار --- */
         .header-section {
+            position: relative;
             text-align: center;
             margin-bottom: 40px;
             display: flex;
@@ -238,104 +173,174 @@
             align-items: center;
         }
 
-        .profile-wrapper {
+        .profile-container {
             position: relative;
-            width: 150px;
-            height: 150px;
+            width: 200px;  /* حجم الدائرة الكلي مع النص */
+            height: 200px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
+        /* الصورة المصغرة */
         .profile-img {
-            width: 100px;
-            height: 100px;
+            position: absolute;
+            width: 110px;  /* حجم الصورة */
+            height: 110px;
             border-radius: 50%;
             overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.2);
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.3); /* توهج أزرق خفيف */
             z-index: 2;
         }
         .profile-img img { width: 100%; height: 100%; object-fit: cover; }
 
-        .rotating-svg {
+        /* النص الدوار (SVG) */
+        .rotating-text-wrapper {
             position: absolute;
-            width: 200px;
-            height: 200px;
-            animation: rotate 12s linear infinite;
+            width: 100%;
+            height: 100%;
+            animation: rotateText 15s linear infinite; /* سرعة الدوران */
             z-index: 1;
-            pointer-events: none;
         }
-        .rotating-svg text { font-size: 11px; font-weight: 700; letter-spacing: 3px; fill: #fff; }
-        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .title-text { font-size: 2rem; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .subtitle-text { font-size: 0.95rem; color: #eee; font-weight: 400; margin-bottom: 10px; }
+        .rotating-text-wrapper text {
+            font-family: 'Courier New', monospace; /* خط مناسب للأرقام والحروف */
+            font-weight: 900;
+            font-size: 13.5px; /* حجم الخط */
+            letter-spacing: 2px; /* تباعد الحروف */
+            fill: #fff;
+            text-shadow: 0 0 5px rgba(255,255,255,0.8);
+        }
 
+        @keyframes rotateText { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .title-text { font-size: 2.2rem; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 15px rgba(0,0,0,0.8); letter-spacing: 1px; }
+        .subtitle-text { font-size: 1rem; color: #ccc; font-weight: 400; text-shadow: 0 0 5px black; }
+
+        /* --- قائمة الأزرار (Lightning Buttons) --- */
         .buttons-list { width: 100%; display: flex; flex-direction: column; gap: 25px; }
 
-        /* الأزرار الشفافة والشرار */
-        .glass-btn {
+        .lightning-btn {
             position: relative;
             width: 100%;
-            height: 65px;
+            height: 70px;
             display: flex;
             justify-content: center;
             align-items: center;
             text-decoration: none;
             color: white;
-            font-weight: 700;
-            font-size: 1.2rem;
-            background: transparent; 
+            font-weight: 800;
+            font-size: 1.3rem;
+            
+            /* خلفية شفافة */
+            background: transparent;
             border-radius: 50px;
-            backdrop-filter: blur(2px); 
-            -webkit-backdrop-filter: blur(2px);
+            
+            /* تمويه خفيف لتمييز الزر */
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            
             transition: transform 0.2s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
         }
 
-        .glass-btn::before {
+        /* عنصر الشرار (البرق) */
+        .lightning-btn::before {
             content: "";
             position: absolute;
             inset: 0;
             border-radius: 50px; 
-            padding: 2px;
-            background: conic-gradient(from var(--angle), transparent 0%, transparent 70%, #00d2ff 85%, #ffffff 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            padding: 2.5px; /* سمك الشرار */
+            
+            /* تدرج لوني يحاكي البرق (أزرق سماوي حاد مع أبيض) */
+            background: conic-gradient(from var(--angle), transparent 0%, transparent 80%, #00d2ff 90%, #ffffff 100%);
+            
+            /* قناع لإظهار الحدود فقط */
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
-            animation: spinBorder 3s linear infinite;
+            
+            /* حركة الدوران */
+            animation: spinLightning 3s linear infinite;
+            
+            /* توهج (Glow) */
+            filter: drop-shadow(0 0 5px #00d2ff);
         }
 
-        @keyframes spinBorder {
+        @keyframes spinLightning {
             from { --angle: 0deg; transform: rotate(0deg); }
             to { --angle: 360deg; transform: rotate(360deg); }
         }
 
-        .glass-btn:active { transform: scale(0.95); }
-        .glass-btn:hover::before { 
-            background: conic-gradient(from var(--angle), transparent 0%, transparent 60%, #4cd137 80%, #ffffff 100%);
+        .lightning-btn:active { transform: scale(0.95); }
+        .lightning-btn:hover::before { 
+            /* عند اللمس يصبح البرق أسرع وأقوى */
+            background: conic-gradient(from var(--angle), transparent 0%, transparent 60%, #fff 80%, #00d2ff 100%);
             animation-duration: 1.5s;
+            filter: drop-shadow(0 0 10px #00d2ff);
         }
 
-        .glass-btn i { margin-left: 15px; font-size: 1.4rem; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .glass-btn span { text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        /* الأيقونات الفضية */
+        .silver-icon {
+            margin-left: 15px;
+            font-size: 1.5rem;
+            /* تدرج لوني فضي */
+            background: linear-gradient(to bottom, #ffffff 0%, #c0c0c0 50%, #808080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); /* ظل للأيقونة */
+        }
 
+        .btn-text {
+            text-shadow: 0 0 10px rgba(0,0,0,0.8); /* ظل للنص ليكون واضحاً */
+            position: relative;
+            z-index: 2;
+        }
+
+        /* زر العودة */
         .back-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-top: 30px;
-            padding: 10px 30px;
-            background: transparent;
+            padding: 10px 40px;
+            background: rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 20px;
             color: rgba(255,255,255,0.8);
-            font-size: 0.9rem;
+            font-size: 1rem;
             text-decoration: none;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
         }
+        .back-btn:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: #fff; }
+
+        /* شاشة اللمس */
+        #click-to-start {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; cursor: pointer;
+        }
+        .click-msg {
+            font-size: 1.2rem; animation: pulse 1s infinite; color: #fff;
+            border: 1px solid rgba(255,255,255,0.5); padding: 10px 40px; border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* زر الموسيقى */
+        #music-control {
+            position: fixed; top: 20px; left: 20px; z-index: 100;
+            width: 45px; height: 45px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+            display: none; justify-content: center; align-items: center; cursor: pointer;
+        }
+        .playing { box-shadow: 0 0 15px #00d2ff; border-color: #00d2ff !important; color: #00d2ff; }
+
     </style>
 </head>
 <body>
@@ -343,65 +348,90 @@
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <audio id="click-sound"><source src="click.mp3" type="audio/mpeg"></audio>
 
+    <!-- شاشة اللمس للبدء -->
     <div id="click-to-start" onclick="startSystem()">
-        <div class="click-msg">اضغط هنا للبدء</div>
+        <div class="click-msg">اضغط للبدء</div>
     </div>
 
-    <!-- شاشة التحميل: هنا يظهر الفيديو وفوقه الشريط الزجاجي الشفاف -->
+    <!-- شاشة التحميل (13 ثانية) -->
     <div id="preloader">
         <video id="loader-video" playsinline>
             <source src="loader.mp4" type="video/mp4">
         </video>
-        
-        <!-- الشريط الشفاف -->
         <div class="glass-loader-bar">
-            <span class="loader-text-content">جاري تحميل الصفحة...</span>
+            <span class="loader-text-content">جاري تحميل البيانات...</span>
             <i class="fas fa-circle-notch loader-icon"></i> 
         </div>
     </div>
 
+    <!-- فيديو الخلفية (يظهر خلف كل شيء) -->
     <video muted loop playsinline id="bg-video"><source src="video.mp4" type="video/mp4"></video>
 
+    <!-- زر الموسيقى -->
     <div id="music-control" onclick="toggleMusic(); playClickSound();">
         <i class="fas fa-volume-up"></i>
     </div>
 
+    <!-- صفحة الدخول (شفافة ليرى الفيديو خلفها) -->
     <div id="intro-screen">
         <div style="text-align: center;">
-            <div class="profile-img" style="width: 130px; height: 130px; margin: 0 auto 25px auto; border: 3px solid rgba(255,255,255,0.8);">
+            <div class="profile-img" style="position: relative; width: 130px; height: 130px; margin: 0 auto 25px auto; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 0 20px #00d2ff;">
                 <img src="profile.png" alt="Logo">
             </div>
-            <h1 style="margin-bottom: 35px; text-shadow: 0 0 20px rgba(0,0,0,0.8);">IKAR SYSTEM</h1>
-            <button class="start-btn" onclick="transitionToMain(); playClickSound();">دخول</button>
+            <h1 style="margin-bottom: 35px; text-shadow: 0 0 20px #00d2ff; font-weight: 900;">RICK VIP</h1>
+            <button class="start-btn" onclick="transitionToMain(); playClickSound();">دخول الموقع</button>
         </div>
     </div>
 
+    <!-- الصفحة الرئيسية -->
     <div id="main-content">
         <div class="header-section">
-            <div class="profile-wrapper">
-                <svg class="rotating-svg" viewBox="0 0 200 200">
-                    <path id="circlePath" d="M 100, 100 m -75, 0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" fill="none" />
-                    <text><textPath href="#circlePath" startOffset="0%">• 𝗥𝗜𝗖𝗞 • 𝗠𝗔𝗦 • 𝗖𝗢𝗧 • 𝗗𝗔𝗠𝗔𝗥 • 𝗩𝗜𝗣 •</textPath></text>
-                </svg>
-                <div class="profile-img"><img src="profile.png" alt="Profile"></div>
+            <!-- حاوية الصورة والنص الدوار -->
+            <div class="profile-container">
+                <!-- 1. النص الدوار -->
+                <div class="rotating-text-wrapper">
+                    <svg viewBox="0 0 200 200" width="100%" height="100%">
+                        <!-- مسار الدائرة الذي يدور عليه النص -->
+                        <path id="textPathCircle" d="M 100, 100 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0" fill="none" />
+                        <text>
+                            <textPath href="#textPathCircle" startOffset="0%">
+                                𝗥𝗜𝗖𝗞 • 𝗠𝗔𝗦 • 𝗖𝗢𝗧 • 𝗗𝗔𝗠𝗔𝗥 • 𝗩𝗜𝗣 • 
+                            </textPath>
+                        </text>
+                    </svg>
+                </div>
+                <!-- 2. الصورة في الوسط -->
+                <div class="profile-img">
+                    <img src="profile.png" alt="Profile">
+                </div>
             </div>
-            <h1 class="title-text">𝗥𝗜𝗖𝗞 | ريك</h1>
-            <p class="subtitle-text">موقع الخاص</p>
+
+            <h1 class="title-text">RICK | ريك</h1>
+            <p class="subtitle-text">موقعي خاص</p>
         </div>
 
         <div class="buttons-list">
-            <a href="https://t.me/P_I_Nl" target="_blank" class="glass-btn" onclick="playClickSound()">
-                <i class="fas fa-bullhorn" style="color: #ff6b6b;"></i> <span>قناة 𝗗𝗔𝗠𝗔𝗥 +</span>
+            
+            <a href="https://t.me/P_I_Nl" target="_blank" class="lightning-btn" onclick="playClickSound()">
+                <i class="fas fa-bullhorn silver-icon"></i> 
+                <span class="btn-text">قناة DAMAR +</span>
             </a>
-            <a href="https://t.me/P_I_NI" target="_blank" class="glass-btn" onclick="playClickSound()">
-                <i class="fas fa-users" style="color: #48dbfb;"></i> <span>جروب 𝗖𝗢𝗧 +</span>
+
+            <a href="https://t.me/P_I_NI" target="_blank" class="lightning-btn" onclick="playClickSound()">
+                <i class="fas fa-users silver-icon"></i> 
+                <span class="btn-text">جروب COT +</span>
             </a>
-            <a href="https://t.me/bobo_8bot" target="_blank" class="glass-btn" onclick="playClickSound()">
-                <i class="fas fa-robot" style="color: #feca57;"></i> <span>بوت 𝗠𝗔𝗦 +</span>
+
+            <a href="https://t.me/bobo_8bot" target="_blank" class="lightning-btn" onclick="playClickSound()">
+                <i class="fas fa-robot silver-icon"></i> 
+                <span class="btn-text">بوت MAS +</span>
             </a>
-            <a href="https://t.me/G_6_M" class="glass-btn" onclick="playClickSound()">
-                <i class="fas fa-check-circle" style="color: #4cd137;"></i> <span>𝗥𝗜𝗖𝗞+</span>
+
+            <a href="https://t.me/G_6_M" class="lightning-btn" onclick="playClickSound()">
+                <i class="fas fa-check-circle silver-icon"></i> 
+                <span class="btn-text">RICK +</span>
             </a>
+
         </div>
 
         <a href="#" class="back-btn" onclick="location.reload(); playClickSound()">
@@ -410,6 +440,7 @@
     </div>
 
     <script>
+        /* إعداد المتغيرات */
         const clickToStart = document.getElementById('click-to-start');
         const preloader = document.getElementById('preloader');
         const loaderVideo = document.getElementById('loader-video');
@@ -420,26 +451,45 @@
         const music = document.getElementById('bg-music');
         const clickSound = document.getElementById('click-sound');
 
+        // تسجيل الخاصية المخصصة للرسوم المتحركة (CSS Houdini) ليعمل الدوران بشكل ناعم
+        if (CSS.registerProperty) {
+            CSS.registerProperty({
+                name: '--angle',
+                syntax: '<angle>',
+                inherits: false,
+                initialValue: '0deg',
+            });
+        }
+
+        // 1. بدء النظام
         function startSystem() {
             clickToStart.style.display = 'none';
             
+            // إظهار التحميل وتشغيل الفيديو
             preloader.style.display = 'flex';
             loaderVideo.currentTime = 0;
             loaderVideo.volume = 1.0; 
             loaderVideo.play();
 
+            // الانتظار 13 ثانية
             setTimeout(() => {
                 preloader.style.opacity = '0';
+                
+                // تشغيل فيديو الخلفية ليكون جاهزاً عند الاختفاء
+                bgVideo.style.opacity = '1';
+                bgVideo.play();
+
                 setTimeout(() => {
                     preloader.style.display = 'none';
                     loaderVideo.pause();
-                    bgVideo.style.opacity = '1';
-                    bgVideo.play();
+                    
+                    // إظهار صفحة الدخول (Intro)
                     intro.style.display = 'flex';
                 }, 1000);
-            }, 13000);
+            }, 13000); 
         }
 
+        // 2. الانتقال من الدخول للرئيسية
         function transitionToMain() {
             music.volume = 0.5;
             music.play();
