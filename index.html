@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝗥𝗜𝗖𝗞</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            perspective: 1000px;
+        }
+
+        /* --- شاشة اللمس الأولى (شفافة تقريباً) --- */
+        #click-to-start {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            background: rgba(0,0,0,0.3); /* تعتيم بسيط جداً */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .click-msg {
+            font-size: 1.1rem;
+            animation: pulse 1s infinite;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 10px 30px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- شاشة التحميل (Preloader) --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: #000;
+            display: none;
+            flex-direction: column;
+            justify-content: center; /* الفيديو والشريط في الوسط */
+            align-items: center;
+            transition: opacity 1s ease-out;
+        }
+
+        #loader-video {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* === [تعديل هام] شريط التحميل الزجاجي الشفاف 100% === */
+        .glass-loader-bar {
+            position: relative;
+            width: 320px; /* عرض مناسب */
+            height: 60px;
+            
+            /* الشفافية الحقيقية: لا لون خلفية */
+            background: rgba(255, 255, 255, 0.01); 
+            
+            /* تأثير الزجاج القوي (التمويه) */
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            
+            /* حدود رفيعة جداً وشفافة */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            
+            /* ظل خفيف جداً لرفع الزجاج عن الفيديو */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            
+            z-index: 2;
+            overflow: hidden;
+            animation: floatBar 3s ease-in-out infinite;
+        }
+
+        /* اللمعة الزرقاء الجانبية (Glow) */
+        .glass-loader-bar::before {
+            content: '';
+            position: absolute;
+            left: -15px; /* مكان اللمعة في اليسار */
+            top: 0;
+            width: 60px;
+            height: 100%;
+            /* تدرج لوني أزرق شفاف جداً */
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.6) 0%, transparent 70%);
+            filter: blur(15px); /* نعومة اللمعة */
+            opacity: 0.8;
+        }
+
+        .loader-text-content {
+            font-size: 1rem;
+            color: #fff;
+            font-weight: 600;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5); /* ظل للنص ليظهر بوضوح فوق الزجاج */
+        }
+
+        .loader-icon {
+            color: #fff;
+            font-size: 1.2rem;
+            animation: spin 2s linear infinite;
+            z-index: 2;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.8); /* توهج للأيقونة */
+        }
+
+        @keyframes floatBar {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* --- باقي التنسيقات (الانتقالات والأزرار) --- */
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            filter: brightness(0.6);
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        #music-control {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .playing { box-shadow: 0 0 15px #4cd137; border-color: #4cd137 !important; }
+
+        /* الانتقالات السينمائية */
+        #intro-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            background: transparent;
+            transform: scale(1);
+            opacity: 1;
+            transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .zoom-out-exit {
+            transform: scale(0.7) !important;
+            opacity: 0 !important;
+            filter: blur(20px);
+        }
+
+        .start-btn {
+            padding: 15px 70px;
+            font-size: 1.2rem;
+            color: #fff;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        .start-btn:hover { background: rgba(255,255,255,0.15); border-color: #fff; letter-spacing: 2px; }
+
+        #main-content {
+            display: none;
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 5;
+            opacity: 0;
+            transform: scale(1.2);
+            transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .zoom-in-enter {
+            opacity: 1 !important;
+            transform: scale(1) !important;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            z-index: 2;
+        }
+        .profile-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .rotating-svg {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            animation: rotate 12s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .rotating-svg text { font-size: 11px; font-weight: 700; letter-spacing: 3px; fill: #fff; }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .title-text { font-size: 2rem; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .subtitle-text { font-size: 0.95rem; color: #eee; font-weight: 400; margin-bottom: 10px; }
+
+        .buttons-list { width: 100%; display: flex; flex-direction: column; gap: 25px; }
+
+        /* الأزرار الشفافة والشرار */
+        .glass-btn {
+            position: relative;
+            width: 100%;
+            height: 65px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            background: transparent; 
+            border-radius: 50px;
+            backdrop-filter: blur(2px); 
+            -webkit-backdrop-filter: blur(2px);
+            transition: transform 0.2s;
+        }
+
+        .glass-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50px; 
+            padding: 2px;
+            background: conic-gradient(from var(--angle), transparent 0%, transparent 70%, #00d2ff 85%, #ffffff 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: spinBorder 3s linear infinite;
+        }
+
+        @keyframes spinBorder {
+            from { --angle: 0deg; transform: rotate(0deg); }
+            to { --angle: 360deg; transform: rotate(360deg); }
+        }
+
+        .glass-btn:active { transform: scale(0.95); }
+        .glass-btn:hover::before { 
+            background: conic-gradient(from var(--angle), transparent 0%, transparent 60%, #4cd137 80%, #ffffff 100%);
+            animation-duration: 1.5s;
+        }
+
+        .glass-btn i { margin-left: 15px; font-size: 1.4rem; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .glass-btn span { text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            padding: 10px 30px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            text-decoration: none;
+            backdrop-filter: blur(2px);
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
+    <audio id="click-sound"><source src="click.mp3" type="audio/mpeg"></audio>
+
+    <div id="click-to-start" onclick="startSystem()">
+        <div class="click-msg">اضغط هنا للبدء</div>
+    </div>
+
+    <!-- شاشة التحميل: هنا يظهر الفيديو وفوقه الشريط الزجاجي الشفاف -->
+    <div id="preloader">
+        <video id="loader-video" playsinline>
+            <source src="loader.mp4" type="video/mp4">
+        </video>
+        
+        <!-- الشريط الشفاف -->
+        <div class="glass-loader-bar">
+            <span class="loader-text-content">جاري تحميل الصفحة...</span>
+            <i class="fas fa-circle-notch loader-icon"></i> 
+        </div>
+    </div>
+
+    <video muted loop playsinline id="bg-video"><source src="video.mp4" type="video/mp4"></video>
+
+    <div id="music-control" onclick="toggleMusic(); playClickSound();">
+        <i class="fas fa-volume-up"></i>
+    </div>
+
+    <div id="intro-screen">
+        <div style="text-align: center;">
+            <div class="profile-img" style="width: 130px; height: 130px; margin: 0 auto 25px auto; border: 3px solid rgba(255,255,255,0.8);">
+                <img src="profile.png" alt="Logo">
+            </div>
+            <h1 style="margin-bottom: 35px; text-shadow: 0 0 20px rgba(0,0,0,0.8);">IKAR SYSTEM</h1>
+            <button class="start-btn" onclick="transitionToMain(); playClickSound();">دخول</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="header-section">
+            <div class="profile-wrapper">
+                <svg class="rotating-svg" viewBox="0 0 200 200">
+                    <path id="circlePath" d="M 100, 100 m -75, 0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" fill="none" />
+                    <text><textPath href="#circlePath" startOffset="0%">• 𝗥𝗜𝗖𝗞 • 𝗠𝗔𝗦 • 𝗖𝗢𝗧 • 𝗗𝗔𝗠𝗔𝗥 • 𝗩𝗜𝗣 •</textPath></text>
+                </svg>
+                <div class="profile-img"><img src="profile.png" alt="Profile"></div>
+            </div>
+            <h1 class="title-text">𝗥𝗜𝗖𝗞 | ريك</h1>
+            <p class="subtitle-text">موقع الخاص</p>
+        </div>
+
+        <div class="buttons-list">
+            <a href="https://t.me/P_I_Nl" target="_blank" class="glass-btn" onclick="playClickSound()">
+                <i class="fas fa-bullhorn" style="color: #ff6b6b;"></i> <span>قناة 𝗗𝗔𝗠𝗔𝗥 +</span>
+            </a>
+            <a href="https://t.me/P_I_NI" target="_blank" class="glass-btn" onclick="playClickSound()">
+                <i class="fas fa-users" style="color: #48dbfb;"></i> <span>جروب 𝗖𝗢𝗧 +</span>
+            </a>
+            <a href="https://t.me/bobo_8bot" target="_blank" class="glass-btn" onclick="playClickSound()">
+                <i class="fas fa-robot" style="color: #feca57;"></i> <span>بوت 𝗠𝗔𝗦 +</span>
+            </a>
+            <a href="https://t.me/G_6_M" class="glass-btn" onclick="playClickSound()">
+                <i class="fas fa-check-circle" style="color: #4cd137;"></i> <span>𝗥𝗜𝗖𝗞+</span>
+            </a>
+        </div>
+
+        <a href="#" class="back-btn" onclick="location.reload(); playClickSound()">
+            <i class="fas fa-undo"></i> رجوع
+        </a>
+    </div>
+
+    <script>
+        const clickToStart = document.getElementById('click-to-start');
+        const preloader = document.getElementById('preloader');
+        const loaderVideo = document.getElementById('loader-video');
+        const intro = document.getElementById('intro-screen');
+        const main = document.getElementById('main-content');
+        const bgVideo = document.getElementById('bg-video');
+        const musicControl = document.getElementById('music-control');
+        const music = document.getElementById('bg-music');
+        const clickSound = document.getElementById('click-sound');
+
+        function startSystem() {
+            clickToStart.style.display = 'none';
+            
+            preloader.style.display = 'flex';
+            loaderVideo.currentTime = 0;
+            loaderVideo.volume = 1.0; 
+            loaderVideo.play();
+
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                    loaderVideo.pause();
+                    bgVideo.style.opacity = '1';
+                    bgVideo.play();
+                    intro.style.display = 'flex';
+                }, 1000);
+            }, 13000);
+        }
+
+        function transitionToMain() {
+            music.volume = 0.5;
+            music.play();
+            musicControl.style.display = 'flex';
+            musicControl.classList.add('playing');
+
+            intro.classList.add('zoom-out-exit');
+
+            main.style.display = 'flex';
+            setTimeout(() => {
+                main.classList.add('zoom-in-enter');
+            }, 100);
+
+            setTimeout(() => {
+                intro.style.display = 'none';
+            }, 1500);
+        }
+
+        function playClickSound() {
+            clickSound.currentTime = 0;
+            clickSound.play();
+        }
+
+        function toggleMusic() {
+            if (music.paused) {
+                music.play();
+                musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                musicControl.classList.add('playing');
+            } else {
+                music.pause();
+                musicControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                musicControl.classList.remove('playing');
+            }
+        }
+    </script>
+</body>
+</html>
