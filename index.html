@@ -8,14 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* === إعدادات الألوان (مستوحاة من الصورة) === */
+        /* === إعدادات الألوان === */
         :root {
-            /* اللون البنفسجي الأساسي الغامق */
             --primary-purple: #7b00ff; 
-            /* اللون البنفسجي الفاتح/الوردي للتوهج */
             --neon-glow: #d000ff;
-            /* خلفية الأزرار */
-            --btn-bg: rgba(60, 0, 80, 0.6);
         }
 
         * {
@@ -32,9 +28,8 @@
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            /* خلفية سوداء مائلة للبنفسجي جداً */
             background-color: #0d001a; 
-            /* ضع صورة الخلفية الخاصة بك هنا */
+            /* تأكد من وجود صورة background.jpg */
             background-image: url('background.jpg'); 
             background-size: cover;
             background-position: center;
@@ -43,94 +38,102 @@
             justify-content: center;
             align-items: center;
             color: white;
-            perspective: 1000px;
+            position: relative;
         }
 
-        /* طبقة فلتر بنفسجي فوق الخلفية لتوحيد اللون */
+        /* طبقة تعتيم خفيفة لضمان وضوح النصوص */
         body::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom, rgba(20, 0, 40, 0.8), rgba(60, 0, 100, 0.9));
-            z-index: -1;
+            background: rgba(10, 0, 20, 0.4); /* شفافية خفيفة */
+            z-index: 0;
+            pointer-events: none;
         }
 
         /* === شاشة البداية === */
         #click-to-start {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999;
             background: url('cover.png') no-repeat center center; 
             background-size: cover;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
-        #click-to-start::after { content: ''; position: absolute; inset: 0; background: rgba(10,0,20,0.85); z-index: -1; }
         
         .click-msg {
-            font-size: 1.2rem; animation: pulse 1.5s infinite; color: #fff;
-            /* حدود مربعة بلون بنفسجي */
+            font-size: 1.1rem; animation: pulse 1.5s infinite; color: #fff;
             border: 2px solid var(--neon-glow);
-            padding: 20px 60px; 
-            border-radius: 0px; /* مربع حاد */
-            background: rgba(40, 0, 60, 0.8);
-            box-shadow: 0 0 30px var(--primary-purple), inset 0 0 20px var(--primary-purple);
+            padding: 15px 40px; 
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 30px var(--primary-purple);
             text-transform: uppercase;
-            letter-spacing: 2px;
             font-weight: 900;
         }
 
         /* === شاشة التحميل === */
         #preloader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 50000;
             background: #0d001a;
             display: none; flex-direction: column;
-            justify-content: center; align-items: center; transition: opacity 1s ease-out;
+            justify-content: center; align-items: center; transition: opacity 0.5s ease-out;
         }
 
         .glass-loader-bar {
-            position: relative; width: 300px; height: 50px;
-            background: rgba(50, 0, 80, 0.3); 
-            border: 2px solid var(--neon-glow); /* إطار بنفسجي */
-            border-radius: 0px; /* مربع */
+            position: relative; width: 250px; height: 50px;
+            background: transparent; 
+            border: 2px solid var(--neon-glow);
             display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
-            box-shadow: 0 0 40px rgba(123, 0, 255, 0.4); z-index: 2; overflow: hidden;
+            box-shadow: 0 0 20px rgba(123, 0, 255, 0.4);
         }
-        .glass-loader-bar::before {
-            content: ''; position: absolute; left: -100%; top: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, var(--neon-glow), transparent);
-            animation: loadLine 2s infinite; opacity: 0.8;
-        }
-        .loader-text-content { font-size: 1rem; color: #fff; font-weight: 700; z-index: 2; text-shadow: 0 0 10px var(--neon-glow); }
-        .loader-icon { color: var(--neon-glow); font-size: 1.2rem; animation: spin 2s linear infinite; z-index: 2; }
+        .loader-text-content { font-size: 0.9rem; color: #fff; font-weight: 700; }
+        .loader-icon { color: var(--neon-glow); font-size: 1.2rem; animation: spin 2s linear infinite; }
 
-        /* === المحتوى === */
+        /* === الحاويات الرئيسية === */
         #intro-screen, #main-content {
-            position: absolute; width: 100%; height: 100%; display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; background: transparent; transition: all 1s ease;
+            position: absolute; 
+            top: 0; left: 0;
+            width: 100%; height: 100%; 
+            display: none; /* يتم التحكم بها عبر JS */
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            z-index: 10; /* تأكدنا أن الطبقة أعلى من الخلفية */
+            transition: all 0.8s ease-in-out;
         }
         
+        /* إصلاح المشكلة: التأكد من أن المحتوى يأخذ مكانه الصحيح */
         #main-content { 
-            width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box;
-            opacity: 0; transform: scale(1.1); 
+            opacity: 0; 
+            transform: scale(0.95); 
+            padding: 20px;
         }
 
-        .zoom-out-exit { transform: scale(0.8); opacity: 0; filter: blur(10px); }
-        .zoom-in-enter { opacity: 1; transform: scale(1); }
+        /* كلاسات الحركة */
+        .show-content {
+            opacity: 1 !important;
+            transform: scale(1) !important;
+            display: flex !important;
+        }
+
+        .hide-content {
+            opacity: 0 !important;
+            transform: scale(1.1) !important;
+            pointer-events: none;
+        }
 
         /* === البروفايل === */
         .profile-container {
-            position: relative; width: 260px; height: 260px;
+            position: relative; width: 220px; height: 220px;
             display: flex; justify-content: center; align-items: center;
-            margin: 0 auto 15px auto;
+            margin-bottom: 20px;
         }
 
         .profile-img {
-            position: absolute; width: 120px; height: 120px;
+            position: absolute; width: 100px; height: 100px;
             border-radius: 50%; 
-            overflow: hidden;
-            /* حدود بنفسجية قوية */
-            border: 4px solid var(--neon-glow);
-            box-shadow: 0 0 60px var(--primary-purple);
+            border: 3px solid var(--neon-glow);
+            box-shadow: 0 0 40px var(--primary-purple);
             z-index: 2; background: #000;
+            overflow: hidden;
         }
         .profile-img img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -139,99 +142,83 @@
             animation: rotateText 20s linear infinite; z-index: 1;
         }
         .rotating-text-wrapper svg { width: 100%; height: 100%; overflow: visible; }
-        
         .rotating-text-wrapper text {
-            font-family: sans-serif; font-weight: 900; font-size: 13px; letter-spacing: 4px;
-            fill: #fff;
-            text-shadow: 0 0 15px var(--neon-glow); /* توهج النص */
-            text-transform: uppercase;
+            font-family: sans-serif; font-weight: 900; font-size: 14px; letter-spacing: 3px;
+            fill: #fff; text-shadow: 0 0 10px var(--neon-glow);
         }
 
         .title-text { 
-            font-size: 2.2rem; font-weight: 900; margin-bottom: 5px; 
-            color: #fff;
-            text-shadow: 0 0 20px var(--neon-glow), 0 0 40px var(--primary-purple);
+            font-size: 2rem; font-weight: 900; margin-bottom: 5px; 
+            color: #fff; text-shadow: 0 0 20px var(--neon-glow);
+            text-align: center;
         }
-        .subtitle-text { font-size: 0.9rem; color: #eebbff; font-weight: 400; text-shadow: 0 0 5px #000; margin-bottom: 20px; }
+        .subtitle-text { font-size: 0.9rem; color: #ccc; margin-bottom: 30px; text-shadow: 0 0 5px #000; text-align: center;}
 
-        /* === الأزرار (مربعة + نفس لون الصورة) === */
+        /* === الأزرار (تعديل: شفافة وبدون لون داخلي) === */
         .buttons-list { 
-            width: 100%; display: flex; flex-direction: column; 
+            width: 100%; max-width: 400px;
+            display: flex; flex-direction: column; 
             gap: 15px; align-items: center; 
         }
 
         .lightning-btn, .start-btn, .back-btn {
-            position: relative; display: flex; justify-content: center; align-items: center;
+            position: relative; 
+            display: flex; justify-content: center; align-items: center;
             text-decoration: none; color: white; font-weight: 800; 
-            /* خلفية بنفسجية نصف شفافة */
-            background: var(--btn-bg);
-            border-radius: 0px; /* مربع تماماً */
-            backdrop-filter: blur(10px);
+            
+            /* === التعديل المطلوب: خلفية شفافة === */
+            background: transparent; 
+            
+            border-radius: 0px; /* مربع */
             transition: all 0.3s; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.5); 
-            /* حدود ثابتة بنفسجية */
-            border: 1px solid var(--neon-glow);
-            overflow: hidden;
+            
+            /* حدود مضيئة فقط */
+            border: 2px solid var(--neon-glow);
+            box-shadow: 0 0 10px rgba(123, 0, 255, 0.2); 
         }
 
-        .lightning-btn { width: 100%; height: 60px; font-size: 1.1rem; }
-        .start-btn { width: 220px; height: 60px; font-size: 1.2rem; margin-top: 20px; cursor: pointer; background: rgba(80, 0, 120, 0.8); }
-        .back-btn { width: 140px; height: 45px; font-size: 0.9rem; margin-top: 20px; border-color: rgba(255,255,255,0.3); background: transparent;}
-
-        /* تأثير الحركة المشعة (البرق) حول الأزرار */
-        .lightning-btn::before, .start-btn::before {
-            content: ""; position: absolute; inset: 0; padding: 2px;
-            background: conic-gradient(from var(--angle), transparent 0%, transparent 70%, var(--neon-glow) 85%, #ffffff 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude;
-            animation: spinLightning 3s linear infinite; 
+        .lightning-btn { width: 100%; height: 55px; font-size: 1.1rem; }
+        .start-btn { width: 200px; height: 55px; font-size: 1.2rem; margin-top: 20px; cursor: pointer; background: rgba(0,0,0,0.3); }
+        
+        .back-btn { 
+            width: 120px; height: 45px; font-size: 0.9rem; margin-top: 30px; 
+            border: 1px solid #fff; opacity: 0.7;
         }
 
-        /* عند الضغط أو التمرير */
-        .lightning-btn:hover, .start-btn:hover {
-            background: rgba(100, 0, 160, 0.8); /* لون أفتح عند اللمس */
-            box-shadow: 0 0 30px var(--primary-purple);
-            transform: translateY(-2px);
+        /* تأثير عند اللمس */
+        .lightning-btn:active, .start-btn:active { 
+            transform: scale(0.95); 
+            background: rgba(208, 0, 255, 0.1); /* لون خفيف جداً عند الضغط */
         }
-        .lightning-btn:active, .start-btn:active { transform: scale(0.98); }
 
         /* الأيقونات */
         .silver-icon {
-            margin-left: 15px; font-size: 1.3rem;
-            color: #fff;
-            filter: drop-shadow(0 0 8px var(--neon-glow)); /* توهج للأيقونات */
+            margin-left: 15px; font-size: 1.3rem; color: #fff;
+            filter: drop-shadow(0 0 5px var(--neon-glow));
         }
-        .btn-text { 
-            position: relative; z-index: 2; 
-            text-shadow: 0 0 10px rgba(200, 0, 255, 0.8);
-        }
+        
+        .btn-text { z-index: 2; text-shadow: 0 0 10px #000; }
 
-        /* أدوات التحكم والحقوق */
+        /* أدوات التحكم */
         #music-control {
-            position: fixed; bottom: 20px; right: 20px; z-index: 100;
-            width: 45px; height: 45px; border-radius: 0px; /* مربع */
-            background: rgba(50, 0, 80, 0.8); border: 1px solid var(--neon-glow);
+            position: fixed; bottom: 20px; right: 20px; z-index: 200;
+            width: 45px; height: 45px; border-radius: 0px;
+            background: transparent; border: 2px solid var(--neon-glow);
             display: none; justify-content: center; align-items: center; cursor: pointer;
-            box-shadow: 0 0 10px var(--primary-purple);
+            color: #fff;
         }
-        .playing { box-shadow: 0 0 25px var(--neon-glow) !important; color: var(--neon-glow); }
+        .playing { box-shadow: 0 0 20px var(--neon-glow); background: rgba(208, 0, 255, 0.2) !important; }
 
         .designer-link {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; text-decoration: none; z-index: 100;
-            text-shadow: 0 0 5px #000; padding: 5px 15px;
-            border-radius: 0px; background: rgba(0,0,0,0.6); 
-            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255, 255, 255, 0.5); font-size: 0.7rem; text-decoration: none; z-index: 200;
+            padding: 5px 15px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5);
             white-space: nowrap;
         }
-        .designer-link:hover { color: var(--neon-glow); border-color: var(--neon-glow); }
 
-        /* Animations */
-        @keyframes pulse { 0% { opacity: 0.7; box-shadow: 0 0 15px var(--primary-purple); } 50% { opacity: 1; box-shadow: 0 0 40px var(--neon-glow); } 100% { opacity: 0.7; box-shadow: 0 0 15px var(--primary-purple); } }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 15px var(--primary-purple); } 50% { box-shadow: 0 0 30px var(--neon-glow); } }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes loadLine { 0% { left: -100%; } 100% { left: 100%; } }
         @keyframes rotateText { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes spinLightning { from { --angle: 0deg; transform: rotate(0deg); } to { --angle: 360deg; transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -239,6 +226,7 @@
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <audio id="click-sound"><source src="click.mp3" type="audio/mpeg"></audio>
 
+    <!-- شاشة البداية -->
     <div id="click-to-start" onclick="startSystem()">
         <div class="click-msg">اضغط لدخول الموقع</div>
     </div>
@@ -246,68 +234,51 @@
     <!-- شاشة التحميل -->
     <div id="preloader">
         <div class="glass-loader-bar">
-            <span class="loader-text-content">جاري تحميل النظام...</span>
+            <span class="loader-text-content">LOADING SYSTEM...</span>
             <i class="fas fa-microchip loader-icon"></i> 
         </div>
     </div>
 
+    <!-- زر الموسيقى -->
     <div id="music-control" onclick="toggleMusic(); playClickSound();">
         <i class="fas fa-volume-up"></i>
     </div>
 
     <a href="https://t.me/O_I_I3" target="_blank" class="designer-link">اضغط هنا لتصميم موقعك</a>
 
-    <!-- === صفحة الدخول === -->
+    <!-- === صفحة المقدمة (زر الدخول) === -->
     <div id="intro-screen">
-        <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-            <div class="profile-container">
-                <div class="rotating-text-wrapper">
-                    <svg viewBox="0 0 300 300">
-                        <defs>
-                            <path id="circlePath" d="M 150, 150 m -100, 0 a 100,100 0 1,1 200,0 a 100,100 0 1,1 -200,0" />
-                        </defs>
-                        <text>
-                            <textPath xlink:href="#circlePath" href="#circlePath">
-                                𝗥𝗜𝗖𝗞 • 𝗠𝗔𝗦 • 𝗖𝗢𝗧 • 𝗗𝗔𝗠𝗔𝗥 • 𝗩𝗜𝗣 • 𝗥𝗜𝗖𝗞 • 𝗠𝗔𝗦 • 𝗖𝗢𝗧 • 
-                            </textPath>
-                        </text>
-                    </svg>
-                </div>
-                <div class="profile-img">
-                    <img src="profile.png" alt="Logo">
-                </div>
+        <div class="profile-container">
+            <div class="rotating-text-wrapper">
+                <svg viewBox="0 0 300 300">
+                    <defs><path id="circlePath" d="M 150, 150 m -100, 0 a 100,100 0 1,1 200,0 a 100,100 0 1,1 -200,0" /></defs>
+                    <text><textPath xlink:href="#circlePath" href="#circlePath">RICK • MAS • COT • DAMAR • VIP • RICK •</textPath></text>
+                </svg>
             </div>
-            <h1 style="margin-bottom: 20px; font-size: 2.5rem; text-shadow: 0 0 30px var(--neon-glow); color: #fff;">RICK VIP</h1>
-            <button class="start-btn" onclick="transitionToMain(); playClickSound();">
-                <span class="btn-text">دخول الموقع</span>
-            </button>
+            <div class="profile-img"><img src="profile.png" alt="Logo"></div>
         </div>
+        <h1 style="margin-bottom: 20px; font-size: 2.5rem; text-shadow: 0 0 30px var(--neon-glow); color: #fff;">RICK VIP</h1>
+        <button class="start-btn" onclick="transitionToMain(); playClickSound();">
+            <span class="btn-text">دخول الموقع</span>
+        </button>
     </div>
 
-    <!-- === الصفحة الرئيسية === -->
+    <!-- === الصفحة الرئيسية (الأزرار) === -->
     <div id="main-content">
-        <div class="header-section">
-            <div class="profile-container">
-                <div class="rotating-text-wrapper">
-                    <svg viewBox="0 0 300 300">
-                        <path id="circlePathMain" d="M 150, 150 m -100, 0 a 100,100 0 1,1 200,0 a 100,100 0 1,1 -200,0" fill="none"/>
-                        <text>
-                            <textPath xlink:href="#circlePathMain" href="#circlePathMain">
-                                𝗥𝗜𝗖𝗞 • 𝗠𝗔𝗦 • 𝗖𝗢𝗧 • 𝗗𝗔𝗠𝗔𝗥 • 𝗩𝗜𝗣 • 𝗥𝗜𝗖𝗞 • 𝗠𝗔𝗦 • 𝗖𝗢𝗧 • 
-                            </textPath>
-                        </text>
-                    </svg>
-                </div>
-                <div class="profile-img">
-                    <img src="profile.png" alt="Profile">
-                </div>
+        <div class="profile-container" style="width: 180px; height: 180px;">
+            <div class="rotating-text-wrapper">
+                <svg viewBox="0 0 300 300">
+                    <path id="circlePathMain" d="M 150, 150 m -100, 0 a 100,100 0 1,1 200,0 a 100,100 0 1,1 -200,0" fill="none"/>
+                    <text><textPath xlink:href="#circlePathMain" href="#circlePathMain">RICK • MAS • COT • DAMAR • VIP • RICK •</textPath></text>
+                </svg>
             </div>
-            <h1 class="title-text">RICK | ريك</h1>
-            <p class="subtitle-text">موقعي الخاص احباب قلبي</p>
+            <div class="profile-img" style="width: 90px; height: 90px;"><img src="profile.png" alt="Profile"></div>
         </div>
+        
+        <h1 class="title-text">RICK | ريك</h1>
+        <p class="subtitle-text">موقعي الخاص احباب قلبي</p>
 
         <div class="buttons-list">
-            
             <a href="https://t.me/P_I_Nl" target="_blank" class="lightning-btn" onclick="playClickSound()">
                 <i class="fas fa-bullhorn silver-icon"></i> <span class="btn-text">قناة DAMAR +</span>
             </a>
@@ -321,9 +292,8 @@
             </a>
 
             <a href="https://t.me/V_l_Kl" class="lightning-btn" onclick="playClickSound()">
-                <i class="fas fa-check-circle silver-icon"></i> <span class="btn-text">تواصل مع ريك +</span>
+                <i class="fas fa-check-circle silver-icon"></i> <span class="btn-text">RICK +</span>
             </a>
-
         </div>
 
         <a href="#" class="back-btn" onclick="location.reload(); playClickSound()">
@@ -340,30 +310,37 @@
         const music = document.getElementById('bg-music');
         const clickSound = document.getElementById('click-sound');
 
-        if (CSS.registerProperty) {
-            CSS.registerProperty({ name: '--angle', syntax: '<angle>', inherits: false, initialValue: '0deg' });
-        }
-
         function startSystem() {
+            // إخفاء شاشة اللمس
             clickToStart.style.display = 'none';
+            // إظهار اللودر
             preloader.style.display = 'flex';
+            
             setTimeout(() => {
                 preloader.style.opacity = '0';
                 setTimeout(() => { 
                     preloader.style.display = 'none'; 
-                    intro.style.display = 'flex'; 
-                }, 800);
-            }, 2500); 
+                    // إظهار شاشة الدخول الأولى
+                    intro.classList.add('show-content');
+                }, 500);
+            }, 2000); 
         }
 
         function transitionToMain() {
+            // تشغيل الموسيقى
             music.volume = 0.5; 
             music.play().catch(e => console.log("Audio play blocked"));
             musicControl.style.display = 'flex'; musicControl.classList.add('playing');
-            intro.classList.add('zoom-out-exit');
-            main.style.display = 'flex';
-            setTimeout(() => { main.classList.add('zoom-in-enter'); }, 100);
-            setTimeout(() => { intro.style.display = 'none'; }, 1000);
+
+            // إخفاء صفحة الدخول
+            intro.classList.remove('show-content');
+            intro.classList.add('hide-content');
+
+            // إظهار الصفحة الرئيسية بعد تأخير بسيط
+            setTimeout(() => {
+                intro.style.display = 'none'; // إزالة نهائية
+                main.classList.add('show-content'); // إظهار المحتوى الرئيسي
+            }, 600);
         }
 
         function playClickSound() { 
